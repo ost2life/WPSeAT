@@ -114,7 +114,7 @@ function wpseat( $user, $username, $password ) {
 		if ($user->ID == 0) {
 			$userdata = array(
 				'user_email' => $ext_auth['user']['email'],
-				'user_login' => $ext_auth['user']['email'],
+				'user_login' => $username,
 				);
 			
 			// Create the new user
