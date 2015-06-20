@@ -107,7 +107,7 @@ function wpseat( $user, $username, $password ) {
 
 		// Try to load user info from the Wordpress user table
 		$userobj = new WP_User();
-		$user = $userobj->get_data_by('email', $ext_auth['user']['email']);
+		$user = $userobj->get_data_by('login', $username);
 		$user = new WP_User($user->ID); // Attempt to load up the user with that ID
 
 		// The user does not exist in the Wordpress user table, setup the minimum required user information
