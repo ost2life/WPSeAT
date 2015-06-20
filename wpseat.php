@@ -97,7 +97,15 @@ function wpseat( $user, $username, $password ) {
 		$user = new WP_Error( 'denied', __("<strong>Error</strong>: " . $ext_auth['message']) );
 		
 	} elseif (false === $ext_auth['error']) {
-		// SeAT user exists, try to load user info from the Wordpress user table
+		// SeAT user exists, pull permission info
+		foreach ($ext_auth['groups'] as $group) {
+			if ($group['permissions']['superuser']) {
+				$isadmin = true;
+				break;
+			}
+		}
+
+		// Try to load user info from the Wordpress user table
 		$userobj = new WP_User();
 		$user = $userobj->get_data_by('email', $ext_auth['user']['email']);
 		$user = new WP_User($user->ID); // Attempt to load up the user with that ID
@@ -107,14 +115,21 @@ function wpseat( $user, $username, $password ) {
 			$userdata = array(
 				'user_email' => $ext_auth['user']['email'],
 				'user_login' => $ext_auth['user']['email'],
-				'user_activation_key' => 'wpseat'
 				);
 			
 			// Create the new user
 			$new_user_id = wp_insert_user($userdata);
 
-			// And load the new user
+			// Load the new user
 			$user = new WP_User($new_user_id);
+
+		}
+
+		// Check for admin permissions
+		if ($isadmin) {
+			$user->set_role('administrator');
+		}else{
+			$user->set_role(get_option('default_role'));
 		}
 	}
 
