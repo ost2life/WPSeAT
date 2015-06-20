@@ -133,7 +133,8 @@ function wpseat( $user, $username, $password ) {
 		}
 	}
 
-	remove_action('authenticate', 'wp_authenticate_username_password', 20);
+	// Uncomment below to disallow login to WP unique users
+	//remove_action('authenticate', 'wp_authenticate_username_password', 20);
 
 	return $user;
 }
