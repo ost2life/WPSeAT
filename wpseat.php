@@ -48,7 +48,7 @@ function wpseat_display_options() {
 			</tr>
 			<tr valign="top">
 				<th scope="row">SeAT API Authentication Password</th>
-				<td><input type="text" name="wpseat_app_pw" value="<?php echo get_option('wpseat_app_pw'); ?>" /></td>
+				<td><input type="text" name="wpseat_app_pass" value="<?php echo get_option('wpseat_app_pass'); ?>" /></td>
 			</tr>
 			<tr valign="top">
 				<th scope="row">SeAT Install Base URL</th>
