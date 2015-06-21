@@ -3,12 +3,16 @@
 
   Plugin Name: WPSeAT
   Description: Used to authenticate a user against the SeAT user database.
-  Version: 0.1
-  Author: BOVRIL
+  Version: 1.0
+  Author: Matt Latham (matt@codepixl.com)
   Author URI: http://matt.codepixl.com
   
  */
 
+// If this file is called directly, abort.
+if ( !defined('WPINC') ) {
+	die;
+}
 
 /************************************
 * Plugin Options
@@ -52,7 +56,7 @@ function wpseat_display_options() {
 			</tr>
 			<tr valign="top">
 				<th scope="row">SeAT Install Base URL</th>
-				<td><input type="text" name="wpseat_base_url" value="<?php echo get_option('wpseat_base_url'); ?>" /></td>
+				<td><input type="text" name="wpseat_base_url" value="<?php echo get_option('wpseat_base_url'); ?>" placeholder="ex. https://domain.com/seat/" /></td>
 			</tr>
 		</table>
 		<p class="submit">
@@ -72,10 +76,10 @@ add_filter('authenticate', 'wpseat', 10, 3);
 
 function wpseat( $user, $username, $password ) {
 
-	// Make sure we have en endpoint
-	if (get_option('wpseat_base_url') == "") return;
+	// Make sure we have an endpoint
+	if ( get_option('wpseat_base_url') == "" ) return;
 
-	$endpoint = rtrim(get_option('wpseat_base_url'), "/") . "/api/v1/authenticate";
+	$endpoint = rtrim( get_option('wpseat_base_url'), "/" ) . "/api/v1/authenticate";
 	$app_user = get_option('wpseat_app_user');
 	$app_pass = get_option('wpseat_app_pass');
 
@@ -90,13 +94,13 @@ function wpseat( $user, $username, $password ) {
 		);
 
 	$response = wp_remote_post($endpoint, $login_data);
-	$ext_auth = json_decode( $response['body'], true );
+	$ext_auth = json_decode($response['body'], true);
 
-	if (true === $ext_auth['error']) {
+	if ( true === $ext_auth['error'] ) {
 		// User does not exist, send back an error message
 		$user = new WP_Error( 'denied', __("<strong>Error</strong>: " . $ext_auth['message']) );
 		
-	} elseif (false === $ext_auth['error']) {
+	} elseif ( false === $ext_auth['error'] ) {
 		// SeAT user exists, pull permission info
 		foreach ($ext_auth['groups'] as $group) {
 			if ($group['permissions']['superuser']) {
@@ -111,7 +115,7 @@ function wpseat( $user, $username, $password ) {
 		$user = new WP_User($user->ID); // Attempt to load up the user with that ID
 
 		// The user does not exist in the Wordpress user table, setup the minimum required user information
-		if ($user->ID == 0) {
+		if ( $user->ID == 0 ) {
 			$userdata = array(
 				'user_email' => $ext_auth['user']['email'],
 				'user_login' => $username,
@@ -126,9 +130,9 @@ function wpseat( $user, $username, $password ) {
 		}
 
 		// Check for admin permissions
-		if ($isadmin) {
+		if ( $isadmin ) {
 			$user->set_role('administrator');
-		}else{
+		} else {
 			$user->set_role(get_option('default_role'));
 		}
 	}
