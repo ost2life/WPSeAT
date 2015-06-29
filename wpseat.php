@@ -6,13 +6,18 @@
   Version: 1.0
   Author: Matt Latham (matt@codepixl.com)
   Author URI: http://matt.codepixl.com
-  
+
  */
 
 // If this file is called directly, abort.
 if ( !defined('WPINC') ) {
 	die;
 }
+
+require 'plugin-update-checker/plugin-update-checker.php';
+$myUpdateChecker = PucFactory::buildUpdateChecker(
+  'http://matt.codepixl.com/eve/wpseat/wpseat.json',
+  __FILE__ );
 
 /************************************
 * Plugin Options
@@ -25,12 +30,14 @@ function wpseat_activate() {
 	add_option('wpseat_app_user', "");
 	add_option('wpseat_app_pass', "");
 	add_option('wpseat_base_url', "");
+  add_option('wpseat_seat_only', "");
 }
 
 function wpseat_init() {
 	register_setting('wpseat', 'wpseat_app_user');
 	register_setting('wpseat', 'wpseat_app_pass');
 	register_setting('wpseat', 'wpseat_base_url');
+  register_setting('wpseat', 'wpseat_seat_only');
 }
 
 // Add settings link to dashboard menu
@@ -57,6 +64,10 @@ function wpseat_display_options() {
 			<tr valign="top">
 				<th scope="row">SeAT Install Base URL</th>
 				<td><input type="text" name="wpseat_base_url" value="<?php echo get_option('wpseat_base_url'); ?>" placeholder="ex. https://domain.com/seat/" /></td>
+			</tr>
+      <tr valign="top">
+				<th scope="row">SeAT Only Logins</th>
+				<td><input type="checkbox" name="wpseat_seat_only" value="true" <?php if (get_option('wpseat_seat_only') == "true") echo "checked=\"checked\""; ?>" /></td>
 			</tr>
 		</table>
 		<p class="submit">
@@ -96,11 +107,11 @@ function wpseat( $user, $username, $password ) {
 	$response = wp_remote_post($endpoint, $login_data);
 	$ext_auth = json_decode($response['body'], true);
 
-	if ( true === $ext_auth['error'] ) {
+	if (true === $ext_auth['error']) {
 		// User does not exist, send back an error message
 		$user = new WP_Error( 'denied', __("<strong>Error</strong>: " . $ext_auth['message']) );
-		
-	} elseif ( false === $ext_auth['error'] ) {
+
+	} elseif (false === $ext_auth['error']) {
 		// SeAT user exists, pull permission info
 		foreach ($ext_auth['groups'] as $group) {
 			if ($group['permissions']['superuser']) {
@@ -120,7 +131,7 @@ function wpseat( $user, $username, $password ) {
 				'user_email' => $ext_auth['user']['email'],
 				'user_login' => $username,
 				);
-			
+
 			// Create the new user
 			$new_user_id = wp_insert_user($userdata);
 
@@ -137,8 +148,10 @@ function wpseat( $user, $username, $password ) {
 		}
 	}
 
-	// Uncomment below to disallow login to WP unique users
-	//remove_action('authenticate', 'wp_authenticate_username_password', 20);
+  // Disallow login to WP unique users
+  if ( get_option('wpseat_seat_only') ) {
+    remove_action('authenticate', 'wp_authenticate_username_password', 20);
+  }
 
 	return $user;
 }
