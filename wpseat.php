@@ -65,9 +65,9 @@ function wpseat_display_options() {
 				<th scope="row">SeAT Install Base URL</th>
 				<td><input type="text" name="wpseat_base_url" value="<?php echo get_option('wpseat_base_url'); ?>" placeholder="ex. https://domain.com/seat/" /></td>
 			</tr>
-      <tr valign="top">
+			<tr valign="top">
 				<th scope="row">SeAT Only Logins</th>
-				<td><input type="checkbox" name="wpseat_seat_only" value="true" <?php if (get_option('wpseat_seat_only') == "true") echo "checked=\"checked\""; ?>" /></td>
+				<td><input type="checkbox" name="wpseat_seat_only" value="true" <?php if (get_option('wpseat_seat_only') == "true") echo "checked=\"checked\""; ?>/></td>
 			</tr>
 		</table>
 		<p class="submit">
