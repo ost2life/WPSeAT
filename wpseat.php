@@ -149,7 +149,7 @@ function wpseat( $user, $username, $password ) {
 	}
 
   // Disallow login to WP unique users
-  if ( get_option('wpseat_seat_only') ) {
+  if ( get_option('wpseat_seat_only') == "true" ) {
     remove_action('authenticate', 'wp_authenticate_username_password', 20);
   }
 
